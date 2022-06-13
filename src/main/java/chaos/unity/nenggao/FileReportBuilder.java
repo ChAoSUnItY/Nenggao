@@ -70,7 +70,7 @@ public class FileReportBuilder {
     public void print(final @NotNull PrintStream printStream) {
         enableWindows10AnsiSupport();
 
-        Source source = Source.fromFile(sourceFile);
+        Source source = SourceCache.INSTANCE.getOrAdd(sourceFile);
 
         if (source == null)
             return;
