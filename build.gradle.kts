@@ -9,6 +9,11 @@ repositories {
     mavenCentral()
 }
 
+tasks.compileJava {
+    // FUCKING WINDOWS ENCODING
+    options.compilerArgs.addAll(arrayOf("-encoding", "UTF-8"))
+}
+
 dependencies {
     implementation("net.java.dev.jna:jna:5.11.0")
     implementation("net.java.dev.jna:jna-platform:5.11.0")

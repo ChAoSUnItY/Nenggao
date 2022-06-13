@@ -1,5 +1,6 @@
 package chaos.unity.nenggao;
 
+import com.diogonunes.jcolor.AnsiFormat;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -23,8 +24,8 @@ public abstract class Report {
         this.message = message;
     }
 
-    public void addSpan(@NotNull Span span, @NotNull String message) {
-        this.labels.add(new Label(span, message));
+    public void addLabel(@NotNull Label label) {
+        this.labels.add(label);
     }
 
     public enum ReportType {
