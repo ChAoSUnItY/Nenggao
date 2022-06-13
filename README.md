@@ -1,4 +1,5 @@
 # [Nenggao](https://en.wikipedia.org/wiki/Mount_Nenggao)
+[![](https://jitpack.io/v/ChAoSUnItY/Nenggao.svg)](https://jitpack.io/#ChAoSUnItY/Nenggao)
 > Makes diagnostic easier!
 A diagnostic library for parser / interpreter usages.
 
