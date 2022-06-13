@@ -14,6 +14,10 @@ Yes, I'm about to say this, this library is still not powerful enough to handle 
 such as multi reference to same position. To avoid this, you should:
 - Break up your error message, this can keep up readability
 
+Here's a list of unworkable examples:
+- Multiple Multiline labels refer to same line
+- Multiple Single line label's span conflicted 
+
 ## License
 This work is licensed under the MIT license.
 
