@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "chaos.unity.nenggao"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -28,4 +28,28 @@ dependencies {
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    classifier = "sources"
+    from(sourceSets.main.get().allSource)
+}
+
+publishing {
+    repositories {
+        maven {
+            // change to point to your repo, e.g. http://my.org/repo
+            url = uri("$buildDir/repo")
+        }
+    }
+    publications {
+        register("mavenJava", MavenPublication::class) {
+            groupId = group.toString()
+            artifactId = "nenggao"
+            version = version
+
+            from(components["java"])
+            artifact(sourcesJar.get())
+        }
+    }
 }
