@@ -9,6 +9,15 @@ Nenggao is a diagnostic library mainly designed for [Yakou Lang's compiler](http
 though it's target for Yakou's development, you can still use it in your own project with its api, which has very
 good extendibility for customization.
 
+## Limitations
+Yes, I'm about to say this, this library is still not powerful enough to handle several scenarios,
+such as multi reference to same position. To avoid this, you should:
+- Break up your error message, this can keep up readability
+
+Here's a list of unworkable examples:
+- Multiple Multiline labels refer to same line
+- Multiple Single line label's span conflicted 
+
 ## License
 This work is licensed under the MIT license.
 
