@@ -12,7 +12,6 @@ public final class SourceCache {
 
     final @NotNull Map<@NotNull File, @NotNull Source> sources = new HashMap<>();
 
-    @SuppressWarnings("")
     public @NotNull Source getOrAdd(@NotNull File sourceFile) {
         return Objects.requireNonNull(sources.computeIfAbsent(sourceFile, file -> Source.fromFile(sourceFile)));
     }
