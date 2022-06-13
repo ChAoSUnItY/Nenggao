@@ -18,6 +18,21 @@ public class Source {
         this.lines = lines;
     }
 
+    /**
+     *
+     * @param startLine starts from 1, pass 0 would throw exception
+     * @param endLine
+     * @return lines segment
+     * @throws IllegalArgumentException
+     */
+    public @NotNull List<@NotNull Line> slice(int startLine, int endLine) throws IllegalArgumentException {
+        if (startLine <= 0) {
+            throw new IllegalArgumentException("Unable to retrieve lines segment from source, start line index must larger than 0.");
+        }
+
+        return lines.subList(startLine - 1 , endLine);
+    }
+
     public static @Nullable Source fromFile(File file) {
         Source source;
 
@@ -25,6 +40,7 @@ public class Source {
             List<String> lines = Files.readAllLines(file.toPath());
             source = fromStrings(lines);
         } catch (IOException e) {
+            e.printStackTrace();
             source = null;
         }
 

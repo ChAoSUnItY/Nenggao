@@ -9,6 +9,6 @@ public class SimpleTest {
     public void testSimpleErrorRendering() {
         File testFile = new File(getClass().getResource("/test.yk").getFile());
         Source source = Source.fromFile(testFile);
-        ReportBuilder.sourceFile("/test.yk").print(System.out);
+        ReportBuilder.sourceFile(testFile).error(Span.singleLine(1, 1, 1), "Test").print(System.out);
     }
 }

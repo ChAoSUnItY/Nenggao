@@ -2,21 +2,29 @@ package chaos.unity.nenggao;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class Report {
-    public final @NotNull Span span;
+    public final @NotNull Span commonSpan;
+    public final @NotNull List<@NotNull Label> labels = new ArrayList<>();
     public final @NotNull ReportType type;
     public final @NotNull String message;
 
     public Report(@NotNull Position startPosition, @NotNull Position endPosition, @NotNull ReportType type, @NotNull String message) {
-        this.span = new Span(startPosition, endPosition);
+        this.commonSpan = new Span(startPosition, endPosition);
         this.type = type;
         this.message = message;
     }
 
     public Report(@NotNull Span span, @NotNull ReportType type, @NotNull String message) {
-        this.span = span;
+        this.commonSpan = span;
         this.type = type;
         this.message = message;
+    }
+
+    public void addSpan(@NotNull Span span, @NotNull String message) {
+        this.labels.add(new Label(span, message));
     }
 
     public enum ReportType {

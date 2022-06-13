@@ -2,27 +2,45 @@ package chaos.unity.nenggao;
 
 import com.diogonunes.jcolor.Ansi;
 import com.diogonunes.jcolor.Attribute;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
 import com.sun.jna.Function;
 import com.sun.jna.platform.win32.WinDef.BOOL;
 import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinDef.DWORDByReference;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReportBuilder {
-    public @NotNull String sourceFilePath;
+    /**
+     * Must be absolute path.
+     */
+    public final @NotNull String sourceFilePath;
+    /**
+     *
+     */
+    public final @NotNull File sourceFile;
     public @NotNull List<@NotNull Report> reports = new ArrayList<>();
 
     private ReportBuilder(@NotNull String sourceFilePath) {
         this.sourceFilePath = sourceFilePath;
+        this.sourceFile = new File(sourceFilePath);
+    }
+
+    private ReportBuilder(@NotNull File sourceFile) {
+        this.sourceFilePath = sourceFile.getAbsolutePath();
+        this.sourceFile = sourceFile;
     }
 
     public static @NotNull ReportBuilder sourceFile(@NotNull String sourceFilePath) {
         return new ReportBuilder(sourceFilePath);
+    }
+
+    public static @NotNull ReportBuilder sourceFile(@NotNull File sourceFile) {
+        return new ReportBuilder(sourceFile);
     }
 
     public @NotNull ReportBuilder warning(@NotNull Span span, @NotNull String message) {
@@ -38,7 +56,32 @@ public class ReportBuilder {
     public void print(final PrintStream printStream) {
         enableWindows10AnsiSupport();
 
-        printStream.println(Ansi.colorize("[error]", Attribute.RED_TEXT()));
+        Source source = Source.fromFile(new File(sourceFilePath));
+
+        if (source == null)
+            return;
+
+        for (Report report : reports) {
+            List<Line> segment = source.slice(report.commonSpan.startPosition.line, report.commonSpan.endPosition.line);
+
+            switch (report.type) {
+                case WARNING:
+                    printStream.append(Ansi.colorize("[Warning] ", Attribute.YELLOW_TEXT()));
+                    break;
+                case ERROR:
+                    printStream.print(Ansi.colorize("[Error] ", Attribute.RED_TEXT()));
+                    break;
+            }
+
+            printStream.append(report.message);
+            printStream.println();
+
+            for (Line line : segment) {
+                printStream.append(line.chars);
+            }
+
+            printStream.flush();
+        }
     }
 
     /* Windows 10 supports Ansi codes. However, it's still experimental and not enabled by default.
