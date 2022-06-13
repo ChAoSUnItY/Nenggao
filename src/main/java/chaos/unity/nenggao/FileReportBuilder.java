@@ -9,6 +9,7 @@ import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinDef.DWORDByReference;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,9 +76,12 @@ public class FileReportBuilder {
             return;
 
         for (Report report : reports) {
-            report.labels.sort((l1, l2) -> l1.span.startPosition.pos - l2.span.endPosition.pos); // Sort label's order so the render algorithm won't mess up
+            report.labels.sort((l1, l2) -> l1.span.startPosition.pos - l2.span.startPosition.pos); // Sort label's order so the render algorithm won't mess up
             int maxNumbersOfDigit = (int) Math.max(Math.log10(report.commonSpan.startPosition.line) + 1, Math.log10(report.commonSpan.endPosition.line) + 1);
 
+            // Used for mapping multi-line diagnostic spacing
+            // Occupation Id - Is Occupied
+            Map<Label, Boolean> occupiedMultiLineLabels = new LinkedHashMap<>();
             List<Line> segment = source.slice(report.commonSpan.startPosition.line, report.commonSpan.endPosition.line);
 
             switch (report.type) {
@@ -90,46 +94,66 @@ public class FileReportBuilder {
             }
 
             printStream.append(report.message);
-            printStream.println();
+            printStream.append('\n');
 
             writeSourceLocation(printStream, maxNumbersOfDigit, report.commonSpan.startPosition);
 
-            List<String> processedLines = new ArrayList<>(segment.size() + report.labels.size());
-            // Used for mapping multi-line diagnostic spacing
-            // Occupation Id - Is Free
-            Map<Integer, Boolean> occupiedMultiLinesDiagnostic = new HashMap<>();
+            for (Label label : report.labels)
+                if (label.isMultiLine())
+                    occupiedMultiLineLabels.put(label, false);
 
-
+            Label currentDominantLabel = null;
             for (int i = 0; i < segment.size(); i++) {
                 Line line = segment.get(i);
                 StringBuilder lineBuilder = new StringBuilder(line.chars);
 
                 int insertedLen = 0;
-                int mostLastPosition = 0;
+                int mostLastPosition = line.len + 1;
                 List<Label> appliedLabels = new LinkedList<>();
                 for (Label label : report.labels) {
-                    if (!label.isMultiLine() && label.isInSameLine(line.lineNumber)) {
-                        if (label.format != null) {
-                            String ansiCode = Ansi.generateCode(label.format);
-                            lineBuilder.insert(insertedLen + label.span.startPosition.pos, ansiCode);
-                            insertedLen += ansiCode.length();
-                            lineBuilder.insert(insertedLen + label.span.startPosition.pos + label.span.offset(), Ansi.RESET);
-                            insertedLen += Ansi.RESET.length();
-                        }
+                    if (label.isIn(line.lineNumber)) {
+                        if (!label.isMultiLine()) {
+                            if (label.format != null) {
+                                int originalStringPos = label.span.startPosition.pos;
+                                String ansiCode = Ansi.generateCode(label.format);
+                                lineBuilder.insert(insertedLen + originalStringPos, ansiCode);
+                                insertedLen += ansiCode.length();
+                                lineBuilder.insert(insertedLen + (originalStringPos += label.span.offset()), Ansi.RESET);
+                                insertedLen += Ansi.RESET.length();
 
-                        mostLastPosition = Math.max(mostLastPosition, label.span.endPosition.pos) + 2;
-                        appliedLabels.add(label);
+                                if (currentDominantLabel != null && currentDominantLabel.format != null) {
+                                    lineBuilder.insert(insertedLen + originalStringPos, Ansi.generateCode(currentDominantLabel.format));
+                                }
+                            }
+
+                            mostLastPosition = Math.max(mostLastPosition, label.span.endPosition.pos + 2);
+                            appliedLabels.add(label);
+                        } else {
+                            if (label.format != null) {
+                                String ansiCode = Ansi.generateCode(label.format);
+                                int startPos = label.span.startPosition.line == line.lineNumber ? label.span.startPosition.pos : 0;
+                                lineBuilder.insert(insertedLen + startPos, ansiCode);
+                                insertedLen += ansiCode.length();
+                                lineBuilder.insert(insertedLen + (line.chars.length() - startPos), Ansi.RESET);
+                            }
+
+                            occupiedMultiLineLabels.computeIfPresent(label, (l, occupied) -> true);
+
+                            currentDominantLabel = label;
+                        }
                     }
-                    // TODO: Handle multiline label
                 }
 
                 writeLineNumber(printStream, line.lineNumber, maxNumbersOfDigit, false);
+                Label endedLabel = writeMultiLineLabel(printStream, line.lineNumber, occupiedMultiLineLabels, null);
+
                 printStream.append(lineBuilder.toString());
 
                 insertedLen = 0;
                 if (!appliedLabels.isEmpty()) {
                     // Render Underline
                     writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
+                    writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null);
 
                     // Render under bars
                     for (Label label : appliedLabels) {
@@ -154,6 +178,7 @@ public class FileReportBuilder {
                     // Render lines, arrows, and label message
                     for (int j = 1; j < appliedLabels.size() * 2; j++) {
                         writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
+                        writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null);
 
                         insertedLen = 0;
                         for (int k = 0; k < appliedLabels.size(); k++) {
@@ -189,6 +214,23 @@ public class FileReportBuilder {
                         printStream.append('\n');
                     }
                 }
+
+                if (endedLabel != null) {
+                    // Render multiline label's message
+                    writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
+                    writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null);
+                    printStream.append('\n');
+                    writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
+                    writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, endedLabel);
+                    occupiedMultiLineLabels.computeIfPresent(endedLabel, (l, occupied) -> false);
+                    if (endedLabel.format != null)
+                        printStream.append(Ansi.generateCode(endedLabel.format));
+                    printStream.append(new String(new char[mostLastPosition]).replace('\0', characterSet.horizontalBar));
+                    if (endedLabel.format != null)
+                        printStream.append(Ansi.RESET);
+                    printStream.format(" %s", endedLabel.message);
+                    printStream.append('\n');
+                }
             }
 
             printStream.append(Ansi.colorize(new String(new char[maxNumbersOfDigit + 1]).replace('\0', characterSet.horizontalBar) + characterSet.rightBottom, Attribute.BRIGHT_BLACK_TEXT()));
@@ -209,7 +251,58 @@ public class FileReportBuilder {
         if (isVirtualLine) printStream.format("%" + maxLineDigit + "s %s ", "", characterSet.verticalBarBreaking);
         else printStream.format("%" + maxLineDigit + "d %s ", lineNumber, characterSet.verticalBar);
         printStream.append(Ansi.RESET);
-        printStream.flush();
+    }
+
+    private @Nullable Label writeMultiLineLabel(final @NotNull PrintStream printStream, int lineNumber, Map<Label, Boolean> labelMap, @Nullable Label terminatedLabel) {
+        List<Map.Entry<Label, Boolean>> entries = new ArrayList<>(labelMap.entrySet());
+        boolean shouldPrint = true;
+        int lastIndex = 0;
+        Label endedLabel = null;
+
+        for (int i = 0; i < entries.size(); i++) {
+            Label label = entries.get(i).getKey();
+
+            if (entries.get(i).getValue()) {
+                // Render bars and arrow
+                if (label.format != null)
+                    printStream.append(Ansi.generateCode(label.format));
+
+                if (label.span.startPosition.line == lineNumber) {
+                    printStream.append(characterSet.leftTop);
+                    printStream.append(new String(new char[(entries.size() - i) * 2]).replace('\0', characterSet.horizontalBar));
+                    printStream.append(characterSet.rightArrow);
+                    shouldPrint = false;
+                    break;
+                } else if (label.span.endPosition.line == lineNumber) {
+                    printStream.append(characterSet.leftCross);
+                    printStream.append(new String(new char[(entries.size() - i) * 2]).replace('\0', characterSet.horizontalBar));
+                    printStream.append(characterSet.rightArrow);
+                    shouldPrint = false;
+                    endedLabel = label;
+                    break;
+                }  else if (label == terminatedLabel) {
+                    printStream.append(characterSet.leftBottom);
+                    printStream.append(new String(new char[(entries.size() - i) * 2 + 2]).replace('\0', characterSet.horizontalBar));
+                    return null;
+                } else {
+                    printStream.append(characterSet.verticalBar);
+                    printStream.append(' ');
+                }
+
+                if (label.format != null)
+                    printStream.append(Ansi.RESET);
+            } else {
+                printStream.append("  ");
+            }
+
+            lastIndex = i + 1;
+        }
+
+        if (shouldPrint)
+            printStream.append(new String(new char[(entries.size() - lastIndex) * 2 + 3]).replace('\0', ' '));
+        else printStream.append(' ');
+
+        return endedLabel;
     }
 
     /* Windows 10 supports Ansi codes. However, it's still experimental and not enabled by default.

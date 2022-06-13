@@ -15,6 +15,10 @@ public class Span {
         return startPosition.line != endPosition.line;
     }
 
+    public boolean isIn(int line) {
+        return startPosition.line <= line && line <= endPosition.line;
+    }
+
     /**
      * get offset of two position, returns -1 when two positions are in different lines or end position is in front of start position.
      * @return offset of two position.

@@ -18,6 +18,10 @@ public class Label {
         return span.startPosition.line == lineNumber;
     }
 
+    public boolean isIn(int line) {
+        return span.isIn(line);
+    }
+
     public boolean isMultiLine() {
         return span.isMultiLine();
     }
