@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -47,7 +48,11 @@ public class Source {
         return source;
     }
 
-    public static Source fromStrings(@NotNull List<@NotNull String> lines) {
+    public static @NotNull Source fromString(@NotNull String line) {
+        return new Source(Arrays.asList(new Line(1, 0, line.length(), line)));
+    }
+
+    public static @NotNull Source fromStrings(@NotNull List<@NotNull String> lines) {
         AtomicInteger offset = new AtomicInteger();
 
         return new Source(IntStream.range(0, lines.size()).mapToObj(i -> {

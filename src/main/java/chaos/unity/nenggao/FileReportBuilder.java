@@ -18,19 +18,15 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class FileReportBuilder {
-    private @NotNull String filePath;
+    private @Nullable String filePath;
     /**
      * The actual source file to retrieve, will be read by {@link Source#fromFile(File)}
      */
-    private final @NotNull File sourceFile;
+    private final @Nullable File sourceFile;
+    private final @Nullable String source;
     private boolean enableColor = true;
     private @NotNull CharacterSet characterSet = CharacterSet.UNICODE;
     private @NotNull List<@NotNull Report> reports = new ArrayList<>();
-
-    private FileReportBuilder(@NotNull String sourceFilePath) {
-        this.filePath = sourceFilePath;
-        this.sourceFile = new File(sourceFilePath);
-    }
 
     private FileReportBuilder(@NotNull File sourceFile) {
         try {
@@ -40,14 +36,21 @@ public class FileReportBuilder {
             this.filePath = sourceFile.getPath();
         }
         this.sourceFile = sourceFile;
+        this.source = null;
     }
 
-    public static @NotNull FileReportBuilder sourceFile(@NotNull String sourceFilePath) {
-        return new FileReportBuilder(sourceFilePath);
+    private FileReportBuilder(@NotNull String source) {
+        this.filePath = null;
+        this.sourceFile = null;
+        this.source = source;
     }
 
     public static @NotNull FileReportBuilder sourceFile(@NotNull File sourceFile) {
         return new FileReportBuilder(sourceFile);
+    }
+
+    public static @NotNull FileReportBuilder source(@NotNull String source) {
+        return new FileReportBuilder(source);
     }
 
     public @NotNull ReportBuilder warning(@NotNull Span span, @NotNull String message, @Nullable Object... args) {
@@ -76,10 +79,12 @@ public class FileReportBuilder {
     public void print(final @NotNull PrintStream printStream) {
         enableWindows10AnsiSupport();
 
-        Source source = SourceCache.INSTANCE.getOrAdd(sourceFile);
+        Source source = sourceFile != null ? SourceCache.INSTANCE.getOrAdd(sourceFile) :
+                this.source != null ? Source.fromString(this.source) : null;
 
-        if (source == null)
-            return;
+        if (source == null) {
+            throw new IllegalStateException("Unable to fetch source to print");
+        }
 
         for (Report report : reports) {
             report.labels.sort((l1, l2) -> l1.span.startPosition.pos - l2.span.startPosition.pos); // Sort label's order so the render algorithm won't mess up
