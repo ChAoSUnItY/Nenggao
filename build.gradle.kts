@@ -1,4 +1,7 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     id("maven-publish")
     id("java")
 }
@@ -30,6 +33,14 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
+tasks.shadowJar {
+    dependencies {
+        include(dependency("net.java.dev.jna:jna:5.11.0"))
+        include(dependency("net.java.dev.jna:jna-platform:5.11.0"))
+        include(dependency("com.diogonunes:JColor:5.5.1"))
+    }
+}
+
 val sourcesJar by tasks.registering(Jar::class) {
     classifier = "sources"
     from(sourceSets.main.get().allSource)
@@ -50,6 +61,7 @@ publishing {
 
             from(components["java"])
             artifact(sourcesJar.get())
+            artifact(tasks.shadowJar)
         }
     }
 }
