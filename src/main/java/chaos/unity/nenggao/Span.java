@@ -1,6 +1,7 @@
 package chaos.unity.nenggao;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Span {
     public final @NotNull Position startPosition;
@@ -30,6 +31,38 @@ public class Span {
             return -1;
         }
         return endPosition.pos - startPosition.pos;
+    }
+
+    /**
+     * expand copy current instance of {@link Span} and attempt to extend end position to {@code endSpan}.
+     * If {@code endSpan} is null, returns copy of current instance; if {@code endSpan}'s {@link Span#endPosition}
+     * is in front of the current instance's {@link Span#startPosition}, returns copy of current instance, otherwise,
+     * returns a copy of current instance, which its {@link Span#endPosition} is replaced by {@code endSpan}'s
+     * {@link Span#endPosition}.
+     * @param endSpan the span to expand with
+     * @return a copy of current instance, field data would be different based on {@code endSpan}'s data
+     */
+    public @NotNull Span expand(@Nullable Span endSpan) {
+        Span copied = copy();
+
+        if (endSpan == null)
+            return copied;
+
+        if (endSpan.endPosition.line < startPosition.line)
+            return copied;
+        else if (endSpan.endPosition.line == startPosition.line) {
+            if (endSpan.endPosition.pos < startPosition.pos)
+                return copied;
+        }
+
+        Position startPosition = this.startPosition;
+        Position endPosition = endSpan.endPosition;
+
+        return new Span(startPosition, endPosition);
+    }
+
+    public @NotNull Span copy() {
+        return new Span(startPosition, endPosition);
     }
 
     /**
