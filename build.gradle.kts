@@ -38,13 +38,11 @@ val sourcesJar by tasks.registering(Jar::class) {
     from(sourceSets.main.get().allSource)
 }
 
+tasks.shadowJar {
+    archiveName = "$baseName-$version.$extension"
+}
+
 publishing {
-    repositories {
-        maven {
-            // change to point to your repo, e.g. http://my.org/repo
-            url = uri("$buildDir/repo")
-        }
-    }
     publications {
         register("mavenJava", MavenPublication::class) {
             groupId = group.toString()
