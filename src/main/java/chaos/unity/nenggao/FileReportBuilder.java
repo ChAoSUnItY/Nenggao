@@ -50,12 +50,12 @@ public class FileReportBuilder {
         return new FileReportBuilder(sourceFile);
     }
 
-    public @NotNull ReportBuilder warning(@NotNull Span span, @NotNull String message) {
-        return new ReportBuilder(this, new Warning(span, message));
+    public @NotNull ReportBuilder warning(@NotNull Span span, @NotNull String message, @Nullable Object... args) {
+        return new ReportBuilder(this, new Warning(span, String.format(message, args)));
     }
 
-    public @NotNull ReportBuilder error(@NotNull Span span, @NotNull String message) {
-        return new ReportBuilder(this, new Error(span, message));
+    public @NotNull ReportBuilder error(@NotNull Span span, @NotNull String message, @Nullable Object... args) {
+        return new ReportBuilder(this, new Error(span, String.format(message, args)));
     }
 
     public @NotNull FileReportBuilder characterSet(@NotNull CharacterSet characterSet) {
@@ -90,17 +90,18 @@ public class FileReportBuilder {
             Map<Label, Boolean> occupiedMultiLineLabels = new LinkedHashMap<>();
             List<Line> segment = source.slice(report.commonSpan.startPosition.line, report.commonSpan.endPosition.line);
 
-            if (enableColor) {
-                switch (report.type) {
-                    case WARNING:
-                        printStream.append(Ansi.colorize("[Warning] ", Attribute.YELLOW_TEXT()));
-                        break;
-                    case ERROR:
-                        printStream.append(Ansi.colorize("[Error] ", Attribute.RED_TEXT()));
-                        break;
-                }
+            switch (report.type) {
+                case WARNING:
+                    writeColor(printStream, Attribute.YELLOW_TEXT());
+                    break;
+                case ERROR:
+                    writeColor(printStream, Attribute.RED_TEXT());
+                    break;
             }
 
+            printStream.format("[%s] ", report.getTag());
+
+            writeReset(printStream);
             printStream.append(report.message);
             printStream.append('\n');
 
@@ -321,7 +322,7 @@ public class FileReportBuilder {
                     shouldPrint = false;
                     endedLabel = label;
                     break;
-                }  else if (label == terminatedLabel) {
+                } else if (label == terminatedLabel) {
                     printStream.append(characterSet.leftBottom);
                     printStream.append(new String(new char[(entries.size() - i) * 2 + 2]).replace('\0', characterSet.horizontalBar));
                     return null;
