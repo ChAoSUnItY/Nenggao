@@ -28,6 +28,10 @@ public abstract class Report {
         this.labels.add(label);
     }
 
+    public abstract void setTag(@NotNull String tag);
+
+    public abstract @NotNull String getTag();
+
     public enum ReportType {
         WARNING,
         ERROR
