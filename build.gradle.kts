@@ -33,14 +33,6 @@ tasks.getByName<Test>("test") {
     useJUnitPlatform()
 }
 
-tasks.shadowJar {
-    dependencies {
-        include(dependency("net.java.dev.jna:jna:5.11.0"))
-        include(dependency("net.java.dev.jna:jna-platform:5.11.0"))
-        include(dependency("com.diogonunes:JColor:5.5.1"))
-    }
-}
-
 val sourcesJar by tasks.registering(Jar::class) {
     classifier = "sources"
     from(sourceSets.main.get().allSource)
@@ -63,4 +55,8 @@ publishing {
             artifact(sourcesJar.get())
         }
     }
+}
+
+artifacts {
+    archives(tasks.shadowJar)
 }
