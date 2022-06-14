@@ -18,11 +18,12 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class FileReportBuilder {
-    public @NotNull String filePath;
+    private @NotNull String filePath;
     /**
      * The actual source file to retrieve, will be read by {@link Source#fromFile(File)}
      */
     private final @NotNull File sourceFile;
+    private boolean enableColor = true;
     private @NotNull CharacterSet characterSet = CharacterSet.UNICODE;
     private @NotNull List<@NotNull Report> reports = new ArrayList<>();
 
@@ -67,6 +68,11 @@ public class FileReportBuilder {
         return this;
     }
 
+    public @NotNull FileReportBuilder enableColor(boolean enable) {
+        this.enableColor = enable;
+        return this;
+    }
+
     public void print(final @NotNull PrintStream printStream) {
         enableWindows10AnsiSupport();
 
@@ -84,13 +90,15 @@ public class FileReportBuilder {
             Map<Label, Boolean> occupiedMultiLineLabels = new LinkedHashMap<>();
             List<Line> segment = source.slice(report.commonSpan.startPosition.line, report.commonSpan.endPosition.line);
 
-            switch (report.type) {
-                case WARNING:
-                    printStream.append(Ansi.colorize("[Warning] ", Attribute.YELLOW_TEXT()));
-                    break;
-                case ERROR:
-                    printStream.append(Ansi.colorize("[Error] ", Attribute.RED_TEXT()));
-                    break;
+            if (enableColor) {
+                switch (report.type) {
+                    case WARNING:
+                        printStream.append(Ansi.colorize("[Warning] ", Attribute.YELLOW_TEXT()));
+                        break;
+                    case ERROR:
+                        printStream.append(Ansi.colorize("[Error] ", Attribute.RED_TEXT()));
+                        break;
+                }
             }
 
             printStream.append(report.message);
@@ -113,7 +121,7 @@ public class FileReportBuilder {
                 for (Label label : report.labels) {
                     if (label.isIn(line.lineNumber)) {
                         if (!label.isMultiLine()) {
-                            if (label.format != null) {
+                            if (label.format != null && enableColor) {
                                 int originalStringPos = label.span.startPosition.pos;
                                 String ansiCode = Ansi.generateCode(label.format);
                                 lineBuilder.insert(insertedLen + originalStringPos, ansiCode);
@@ -129,7 +137,7 @@ public class FileReportBuilder {
                             mostLastPosition = Math.max(mostLastPosition, label.span.endPosition.pos + 2);
                             appliedLabels.add(label);
                         } else {
-                            if (label.format != null) {
+                            if (label.format != null && enableColor) {
                                 String ansiCode = Ansi.generateCode(label.format);
                                 int startPos = label.span.startPosition.line == line.lineNumber ? label.span.startPosition.pos : 0;
                                 lineBuilder.insert(insertedLen + startPos, ansiCode);
@@ -169,7 +177,9 @@ public class FileReportBuilder {
                             } else underlineBuilder.append(characterSet.underline);
                         }
 
-                        printStream.append(label.format != null ? Ansi.colorize(underlineBuilder.toString(), label.format) : underlineBuilder.toString());
+                        boolean reset = writeColor(printStream, label.format);
+                        printStream.append(underlineBuilder.toString());
+                        if (reset) writeReset(printStream);
                         insertedLen += spaceLen + offset;
                     }
 
@@ -197,18 +207,18 @@ public class FileReportBuilder {
 
                             if (j % 2 == 1) {
                                 appliedLabels.set(k, null); // Mark printed
-                                if (label.format != null)
-                                    printStream.append(Ansi.generateCode(label.format));
+                                boolean reset = writeColor(printStream, label.format);
                                 printStream.append(String.valueOf(characterSet.leftBottom));
                                 printStream.append(new String(new char[mostLastPosition - insertedLen]).replace('\0', characterSet.horizontalBar));
-                                if (label.format != null)
-                                    printStream.append(Ansi.RESET);
+                                if (reset) writeReset(printStream);
                                 printStream.append(' ');
                                 printStream.append(label.message);
                                 break;
                             }
 
-                            printStream.append(label.format != null ? Ansi.colorize(String.valueOf(characterSet.verticalBar), label.format) : String.valueOf(characterSet.verticalBar));
+                            boolean reset = writeColor(printStream, label.format);
+                            printStream.append(characterSet.verticalBar);
+                            if (reset) writeReset(printStream);
                         }
 
                         printStream.append('\n');
@@ -223,34 +233,66 @@ public class FileReportBuilder {
                     writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
                     writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, endedLabel);
                     occupiedMultiLineLabels.computeIfPresent(endedLabel, (l, occupied) -> false);
-                    if (endedLabel.format != null)
-                        printStream.append(Ansi.generateCode(endedLabel.format));
+                    boolean reset = writeColor(printStream, endedLabel.format);
                     printStream.append(new String(new char[mostLastPosition]).replace('\0', characterSet.horizontalBar));
-                    if (endedLabel.format != null)
-                        printStream.append(Ansi.RESET);
+                    if (reset) writeReset(printStream);
                     printStream.format(" %s", endedLabel.message);
                     printStream.append('\n');
                 }
             }
 
-            printStream.append(Ansi.colorize(new String(new char[maxNumbersOfDigit + 1]).replace('\0', characterSet.horizontalBar) + characterSet.rightBottom, Attribute.BRIGHT_BLACK_TEXT()));
+            writeColor(printStream, Attribute.BRIGHT_BLACK_TEXT());
+            printStream.append(new String(new char[maxNumbersOfDigit + 1]).replace('\0', characterSet.horizontalBar));
+            printStream.append(characterSet.rightBottom);
+            writeReset(printStream);
             printStream.append('\n');
 
             printStream.flush();
         }
     }
 
+    private boolean writeColor(final @NotNull PrintStream printStream, @Nullable Attribute... attributes) {
+        boolean printed = false;
+
+        for (Attribute attr : attributes) {
+            if (attr != null && enableColor) {
+                printStream.append(Ansi.generateCode(attr));
+                printed = true;
+            }
+        }
+
+        return printed;
+    }
+
+    private boolean writeColor(final @NotNull PrintStream printStream, @Nullable AnsiFormat format) {
+        if (format != null && enableColor) {
+            printStream.append(Ansi.generateCode(format));
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void writeReset(final @NotNull PrintStream printStream) {
+        if (enableColor) printStream.append(Ansi.RESET);
+    }
+
     private void writeSourceLocation(final @NotNull PrintStream printStream, int maxLineDigit, Position startPosition) {
-        printStream.append(Ansi.generateCode(Attribute.BRIGHT_BLACK_TEXT()));
-        printStream.format("%" + (maxLineDigit + 2) + "s%s", characterSet.leftTop, characterSet.horizontalBar);
-        printStream.format("[%s%s:%d:%d%s]\n", Ansi.RESET, filePath, startPosition.line, startPosition.pos, Ansi.generateCode(Attribute.BRIGHT_BLACK_TEXT()));
+        writeColor(printStream, Attribute.BRIGHT_BLACK_TEXT());
+        printStream.format("%" + (maxLineDigit + 2) + "s%s[", characterSet.leftTop, characterSet.horizontalBar);
+        writeReset(printStream);
+        printStream.format("%s:%d:%d", filePath, startPosition.line, startPosition.pos);
+        writeColor(printStream, Attribute.BRIGHT_BLACK_TEXT());
+        printStream.append(']');
+        writeReset(printStream);
+        printStream.append('\n');
     }
 
     private void writeLineNumber(final @NotNull PrintStream printStream, int lineNumber, int maxLineDigit, boolean isVirtualLine) {
-        printStream.append(Ansi.generateCode(Attribute.BRIGHT_BLACK_TEXT()));
+        writeColor(printStream, Attribute.BRIGHT_BLACK_TEXT());
         if (isVirtualLine) printStream.format("%" + maxLineDigit + "s %s ", "", characterSet.verticalBarBreaking);
         else printStream.format("%" + maxLineDigit + "d %s ", lineNumber, characterSet.verticalBar);
-        printStream.append(Ansi.RESET);
+        writeReset(printStream);
     }
 
     private @Nullable Label writeMultiLineLabel(final @NotNull PrintStream printStream, int lineNumber, Map<Label, Boolean> labelMap, @Nullable Label terminatedLabel) {
@@ -264,8 +306,7 @@ public class FileReportBuilder {
 
             if (entries.get(i).getValue()) {
                 // Render bars and arrow
-                if (label.format != null)
-                    printStream.append(Ansi.generateCode(label.format));
+                boolean reset = writeColor(printStream, label.format);
 
                 if (label.span.startPosition.line == lineNumber) {
                     printStream.append(characterSet.leftTop);
@@ -289,8 +330,7 @@ public class FileReportBuilder {
                     printStream.append(' ');
                 }
 
-                if (label.format != null)
-                    printStream.append(Ansi.RESET);
+                if (reset) writeReset(printStream);
             } else {
                 printStream.append("  ");
             }
@@ -335,6 +375,11 @@ public class FileReportBuilder {
         private ReportBuilder(final @NotNull FileReportBuilder parentBuilder, @NotNull Report report) {
             this.parentBuilder = parentBuilder;
             this.report = report;
+        }
+
+        public @NotNull ReportBuilder tag(@NotNull String tag) {
+            report.setTag(tag);
+            return this;
         }
 
         public @NotNull LabelBuilder label(@NotNull Span span, @NotNull String message) {

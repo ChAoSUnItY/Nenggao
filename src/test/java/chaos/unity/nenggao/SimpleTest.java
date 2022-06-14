@@ -13,6 +13,7 @@ public class SimpleTest {
         FileReportBuilder.sourceFile(testFile)
                 .relativePath(testFile.getParentFile().toPath())
                 .characterSet(CharacterSet.UNICODE)
+                .enableColor(false)
                 .warning(Span.multipleLine(1, 0, 6, 0), "Test1")
                 .label(Span.multipleLine(1, 0, 3, 8), "LOL").color(Attribute.RED_TEXT()).build()
                 .label(Span.multipleLine(2, 0,5, 0), "KEK").color(Attribute.BRIGHT_MAGENTA_TEXT()).build()
