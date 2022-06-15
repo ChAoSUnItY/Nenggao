@@ -2,6 +2,7 @@ package chaos.unity.nenggao;
 
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("unused")
 public class Error extends Report {
     public @NotNull String tag = "error";
 

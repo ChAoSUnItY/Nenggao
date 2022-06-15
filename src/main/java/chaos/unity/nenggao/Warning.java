@@ -2,6 +2,7 @@ package chaos.unity.nenggao;
 
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("unused")
 public class Warning extends Report {
     public @NotNull String tag = "warning";
 
