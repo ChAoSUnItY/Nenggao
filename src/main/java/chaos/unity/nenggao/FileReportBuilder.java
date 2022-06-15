@@ -106,7 +106,7 @@ public class FileReportBuilder {
     /**
      * Print out all stored reports.
      *
-     * @param printStream  the output stream to print reports
+     * @param printStream the output stream to print reports
      */
     public void print(final @NotNull PrintStream printStream) {
         enableWindows10AnsiSupport();
