@@ -57,12 +57,27 @@ public class FileReportBuilder {
         return new FileReportBuilder(source);
     }
 
+    public @NotNull FileReportBuilder report(@NotNull Report report) {
+        this.reports.add(report);
+        return this;
+    }
+
     public @NotNull ReportBuilder warning(@NotNull Span span, @NotNull String message, @Nullable Object... args) {
         return new ReportBuilder(this, new Warning(span, String.format(message, args)));
     }
 
+    public @NotNull FileReportBuilder warning(@NotNull Warning warning) {
+        this.reports.add(warning);
+        return this;
+    }
+
     public @NotNull ReportBuilder error(@NotNull Span span, @NotNull String message, @Nullable Object... args) {
         return new ReportBuilder(this, new Error(span, String.format(message, args)));
+    }
+
+    public @NotNull FileReportBuilder error(@NotNull Error error) {
+        this.reports.add(error);
+        return this;
     }
 
     public @NotNull FileReportBuilder sourceName(@NotNull String sourceName) {
