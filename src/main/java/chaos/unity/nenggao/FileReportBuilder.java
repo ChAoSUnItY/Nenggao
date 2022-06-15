@@ -84,6 +84,11 @@ public class FileReportBuilder {
         return this;
     }
 
+    /**
+     * Print out all stored reports.
+     *
+     * @param printStream  the output stream to print reports
+     */
     public void print(final @NotNull PrintStream printStream) {
         enableWindows10AnsiSupport();
 
@@ -125,8 +130,7 @@ public class FileReportBuilder {
                     occupiedMultiLineLabels.put(label, false);
 
             Label currentDominantLabel = null;
-            for (int i = 0; i < segment.size(); i++) {
-                Line line = segment.get(i);
+            for (Line line : segment) {
                 StringBuilder lineBuilder = new StringBuilder(line.chars);
 
                 int insertedLen = 0;
@@ -268,6 +272,7 @@ public class FileReportBuilder {
     /**
      * dump prints out all built reports but also clear reports for reusing.
      *
+     * @param printStream the output stream to print reports
      * @return builder with reports cleared.
      */
     public @NotNull FileReportBuilder dump(final @NotNull PrintStream printStream) {
