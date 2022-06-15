@@ -108,7 +108,7 @@ public class FileReportBuilder {
             int maxNumbersOfDigit = (int) Math.max(Math.log10(report.commonSpan.startPosition.line) + 1, Math.log10(report.commonSpan.endPosition.line) + 1);
 
             // Used for mapping multi-line diagnostic spacing
-            // Occupation Id - Is Occupied
+            // Label instance - Is Occupied
             Map<Label, Boolean> occupiedMultiLineLabels = new LinkedHashMap<>();
             List<Line> segment = source.slice(report.commonSpan.startPosition.line, report.commonSpan.endPosition.line);
 
