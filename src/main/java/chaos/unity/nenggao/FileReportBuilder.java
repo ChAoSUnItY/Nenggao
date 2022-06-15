@@ -279,7 +279,7 @@ public class FileReportBuilder {
         return false;
     }
 
-    public boolean conatinsReport() {
+    public boolean containsReport() {
         return reports.isEmpty();
     }
 
