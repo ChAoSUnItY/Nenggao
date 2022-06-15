@@ -45,7 +45,7 @@ public class FileReportBuilder {
         this.filePath = null;
         this.sourceFile = null;
         this.sourceName = "Unknown";
-        this.source = source;
+        this.source = source.endsWith("\n") ? source : source + "\n";
     }
 
     public static @NotNull FileReportBuilder sourceFile(@NotNull File sourceFile) {
