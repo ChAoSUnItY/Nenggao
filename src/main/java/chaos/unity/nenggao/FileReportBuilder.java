@@ -19,6 +19,7 @@ import java.util.*;
 
 public class FileReportBuilder {
     private @Nullable String filePath;
+    private @NotNull String sourceName;
     /**
      * The actual source file to retrieve, will be read by {@link Source#fromFile(File)}
      */
@@ -36,12 +37,14 @@ public class FileReportBuilder {
             this.filePath = sourceFile.getPath();
         }
         this.sourceFile = sourceFile;
+        this.sourceName = filePath;
         this.source = null;
     }
 
     private FileReportBuilder(@NotNull String source) {
         this.filePath = null;
         this.sourceFile = null;
+        this.sourceName = "Unknown";
         this.source = source;
     }
 
@@ -59,6 +62,11 @@ public class FileReportBuilder {
 
     public @NotNull ReportBuilder error(@NotNull Span span, @NotNull String message, @Nullable Object... args) {
         return new ReportBuilder(this, new Error(span, String.format(message, args)));
+    }
+
+    public @NotNull FileReportBuilder sourceName(@NotNull String sourceName) {
+        this.sourceName = sourceName;
+        return this;
     }
 
     public @NotNull FileReportBuilder characterSet(@NotNull CharacterSet characterSet) {
@@ -287,7 +295,7 @@ public class FileReportBuilder {
         writeColor(printStream, Attribute.BRIGHT_BLACK_TEXT());
         printStream.format("%" + (maxLineDigit + 2) + "s%s[", characterSet.leftTop, characterSet.horizontalBar);
         writeReset(printStream);
-        printStream.format("%s:%d:%d", filePath, startPosition.line, startPosition.pos);
+        printStream.format("%s:%d:%d", sourceName, startPosition.line, startPosition.pos);
         writeColor(printStream, Attribute.BRIGHT_BLACK_TEXT());
         printStream.append(']');
         writeReset(printStream);
