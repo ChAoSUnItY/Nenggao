@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "chaos.unity.nenggao"
-version = "1.1.1"
+version = "1.1.2"
 
 repositories {
     mavenCentral()
