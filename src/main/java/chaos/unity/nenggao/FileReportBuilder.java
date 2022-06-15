@@ -265,15 +265,26 @@ public class FileReportBuilder {
         }
     }
 
+    /**
+     * dump prints out all built reports but also clear reports for reusing.
+     *
+     * @return builder with reports cleared.
+     */
+    public @NotNull FileReportBuilder dump(final @NotNull PrintStream printStream) {
+        print(printStream);
+        reports.clear();
+        return this;
+    }
+
     public boolean containsError() {
-        for (Report report: reports)
+        for (Report report : reports)
             if (report.type == Report.ReportType.ERROR)
                 return true;
         return false;
     }
 
     public boolean containsWarning() {
-        for (Report report: reports)
+        for (Report report : reports)
             if (report.type == Report.ReportType.WARNING)
                 return true;
         return false;
