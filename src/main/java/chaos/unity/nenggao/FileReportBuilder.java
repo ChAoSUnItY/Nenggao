@@ -396,8 +396,8 @@ public class FileReportBuilder {
             return this;
         }
 
-        public @NotNull LabelBuilder label(@NotNull Span span, @NotNull String message) {
-            return new LabelBuilder(this, new Label(span, message));
+        public @NotNull LabelBuilder label(@NotNull Span span, @NotNull String message, @Nullable Object... args) {
+            return new LabelBuilder(this, new Label(span, String.format(message, args)));
         }
 
         public @NotNull FileReportBuilder build() {
