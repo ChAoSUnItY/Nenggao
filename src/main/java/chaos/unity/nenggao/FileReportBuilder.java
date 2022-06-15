@@ -104,7 +104,7 @@ public class FileReportBuilder {
         }
 
         for (Report report : reports) {
-            report.labels.sort((l1, l2) -> l1.span.startPosition.pos - l2.span.startPosition.pos); // Sort label's order so the render algorithm won't mess up
+            report.labels.sort(Comparator.comparingInt(l -> l.span.startPosition.pos)); // Sort label's order so the render algorithm won't mess up
             int maxNumbersOfDigit = (int) Math.max(Math.log10(report.commonSpan.startPosition.line) + 1, Math.log10(report.commonSpan.endPosition.line) + 1);
 
             // Used for mapping multi-line diagnostic spacing
