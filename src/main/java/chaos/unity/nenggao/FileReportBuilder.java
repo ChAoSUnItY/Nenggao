@@ -265,6 +265,24 @@ public class FileReportBuilder {
         }
     }
 
+    public boolean containsError() {
+        for (Report report: reports)
+            if (report.type == Report.ReportType.ERROR)
+                return true;
+        return false;
+    }
+
+    public boolean containsWarning() {
+        for (Report report: reports)
+            if (report.type == Report.ReportType.WARNING)
+                return true;
+        return false;
+    }
+
+    public boolean conatinsReport() {
+        return reports.isEmpty();
+    }
+
     private boolean writeColor(final @NotNull PrintStream printStream, @Nullable Attribute... attributes) {
         boolean printed = false;
 
