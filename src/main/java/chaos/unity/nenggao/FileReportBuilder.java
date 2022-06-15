@@ -76,6 +76,9 @@ public class FileReportBuilder {
     }
 
     public @NotNull FileReportBuilder relativePath(@NotNull Path parentPath) {
+        if (sourceFile == null)
+            throw new IllegalStateException("Failed to relativize path of source file, source file must not be null.");
+
         this.filePath = parentPath.relativize(sourceFile.toPath()).toString();
         return this;
     }
