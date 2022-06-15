@@ -17,6 +17,7 @@ import java.io.PrintStream;
 import java.nio.file.Path;
 import java.util.*;
 
+@SuppressWarnings("unused")
 public class FileReportBuilder {
     private @Nullable String filePath;
     private @NotNull String sourceName;
