@@ -28,7 +28,7 @@ public class FileReportBuilder {
     private final @Nullable String source;
     private boolean enableColor = true;
     private @NotNull CharacterSet characterSet = CharacterSet.UNICODE;
-    private @NotNull List<@NotNull Report> reports = new ArrayList<>();
+    private final @NotNull List<@NotNull Report> reports = new ArrayList<>();
 
     private FileReportBuilder(@NotNull File sourceFile) {
         try {
