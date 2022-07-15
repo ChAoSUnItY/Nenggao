@@ -490,6 +490,11 @@ public class FileReportBuilder {
             this.label = label;
         }
 
+        public @NotNull LabelBuilder hint(@NotNull String hint, @Nullable Object... args) {
+            label.setHint(String.format(hint, args));
+            return this;
+        }
+
         public @NotNull LabelBuilder color(@NotNull AnsiFormat format) {
             label.format = format;
             return this;

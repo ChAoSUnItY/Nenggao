@@ -8,10 +8,20 @@ public class Label {
     public @Nullable AnsiFormat format = null;
     public final @NotNull Span span;
     public final @NotNull String message;
+    public @Nullable String hint = null;
 
     public Label(@NotNull Span span, @NotNull String message) {
         this.span = span;
         this.message = message;
+    }
+
+
+    public void setHint(@NotNull String hint) {
+        this.hint = hint;
+    }
+
+    public @Nullable String getHint() {
+        return hint;
     }
 
     public boolean isInSameLine(int lineNumber) {
