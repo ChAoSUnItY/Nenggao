@@ -30,10 +30,10 @@ public class SimpleTest {
         FileReportBuilder.sourceFile(testFile)
                 .warning(Span.multipleLine(1, 0, 10, 0), "Warning No.1")
                 .label(Span.singleLine(1, 0, 1), "Label No.1").color(Attribute.RED_TEXT()).build()
-                .label(Span.singleLine(10, 0, 1), "Label No.2").color(Attribute.YELLOW_TEXT()).build()
+                .label(Span.singleLine(10, 0, 1), "Label No.2").color(Attribute.YELLOW_TEXT()).hint("Hint!").build()
                 .build()
                 .warning(Span.multipleLine(1, 0, 10, 0), "Warning No.2")
-                .label(Span.multipleLine(1, 0, 10, 1), "Label").color(Attribute.RED_TEXT()).build()
+                .label(Span.multipleLine(1, 0, 10, 1), "Label").color(Attribute.RED_TEXT()).hint("Hint!").build()
                 .build()
                 .print(System.out);
     }

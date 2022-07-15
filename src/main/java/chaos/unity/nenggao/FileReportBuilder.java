@@ -225,7 +225,7 @@ public class FileReportBuilder {
                     // Render under bars
                     for (Label label : appliedLabels) {
                         int spaceLen = label.span.startPosition.pos - insertedLen;
-                        if (spaceLen > 0) // Prevent unnecessary appending
+                        if (spaceLen > 0) // Prevent unnecessary padding
                             printStream.append(new String(new char[spaceLen]).replace('\0', ' '));
 
                         int offset = label.span.offset();
@@ -272,6 +272,20 @@ public class FileReportBuilder {
                                 if (reset) writeReset(printStream);
                                 printStream.append(' ');
                                 printStream.append(label.message);
+
+                                if (label.hint != null) {
+                                    printStream.append('\n');
+
+                                    writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
+                                    writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null, characterSet.verticalBar);
+
+                                    printStream.append(new String(new char[mostLastPosition - insertedLen + 1]).replace('\0', ' '));
+                                    boolean resetHint = writeColor(printStream, Attribute.BRIGHT_BLUE_TEXT());
+                                    printStream.append("!hint: ");
+                                    printStream.append(label.hint);
+                                    if (resetHint) printStream.append(Ansi.RESET);
+                                }
+
                                 break;
                             }
 
@@ -296,6 +310,20 @@ public class FileReportBuilder {
                     printStream.append(new String(new char[mostLastPosition]).replace('\0', characterSet.horizontalBar));
                     if (reset) writeReset(printStream);
                     printStream.format(" %s", endedLabel.message);
+
+                    if (endedLabel.hint != null) {
+                        printStream.append('\n');
+
+                        writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
+                        writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null, characterSet.verticalBar);
+
+                        printStream.append(new String(new char[mostLastPosition]).replace('\0', ' '));
+                        boolean resetHint = writeColor(printStream, Attribute.BRIGHT_BLUE_TEXT());
+                        printStream.append("!hint: ");
+                        printStream.append(endedLabel.hint);
+                        if (resetHint) printStream.append(Ansi.RESET);
+                    }
+
                     printStream.append('\n');
                 }
             }
@@ -340,10 +368,17 @@ public class FileReportBuilder {
         return reports.isEmpty();
     }
 
-    private void writeColor(final @NotNull PrintStream printStream, @Nullable Attribute... attributes) {
-        for (Attribute attr : attributes)
-            if (attr != null && enableColor)
+    private boolean writeColor(final @NotNull PrintStream printStream, @Nullable Attribute... attributes) {
+        boolean reset = false;
+
+        for (Attribute attr : attributes) {
+            if (attr != null && enableColor) {
                 printStream.append(Ansi.generateCode(attr));
+                reset = true;
+            }
+        }
+
+        return reset;
     }
 
     private boolean writeColor(final @NotNull PrintStream printStream, @Nullable AnsiFormat format) {
