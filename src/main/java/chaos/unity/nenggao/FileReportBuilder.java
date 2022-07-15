@@ -279,6 +279,7 @@ public class FileReportBuilder {
                                     writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
                                     writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null, characterSet.verticalBar);
 
+                                    printStream.append(new String(new char[spaceLen + offset]).replace('\0', ' '));
                                     printStream.append(new String(new char[mostLastPosition - insertedLen + 1]).replace('\0', ' '));
                                     boolean resetHint = writeColor(printStream, Attribute.BRIGHT_BLUE_TEXT());
                                     printStream.append("!hint: ");
