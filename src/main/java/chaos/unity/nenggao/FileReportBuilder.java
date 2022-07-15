@@ -148,13 +148,16 @@ public class FileReportBuilder {
                 if (label.isMultiLine())
                     occupiedMultiLineLabels.put(label, false);
 
+            boolean previousLineRendered = true;
+            boolean renderSource;
             Label currentDominantLabel = null;
             for (Line line : segment) {
                 StringBuilder lineBuilder = new StringBuilder(line.chars);
-
+                List<Label> appliedLabels = new LinkedList<>();
                 int insertedLen = 0;
                 int mostLastPosition = line.len + 1;
-                List<Label> appliedLabels = new LinkedList<>();
+                renderSource = false;
+
                 for (Label label : report.labels) {
                     if (label.isIn(line.lineNumber)) {
                         if (!label.isMultiLine()) {
@@ -187,10 +190,29 @@ public class FileReportBuilder {
                             currentDominantLabel = label;
                         }
                     }
+
+                    if ((label.span.startPosition.line >= line.lineNumber - 1 && label.span.startPosition.line <= line.lineNumber + 1) ||
+                            (label.span.endPosition.line >= line.lineNumber - 1 && label.span.endPosition.line <= line.lineNumber + 1)) {
+                        renderSource = true;
+                    }
                 }
 
+                if (!renderSource) {
+                    if (previousLineRendered) {
+                        writeColor(printStream, Attribute.BRIGHT_BLACK_TEXT());
+                        printStream.format("%" + maxNumbersOfDigit + "s %s ", "", characterSet.verticalEllipsis);
+                        writeReset(printStream);
+                        writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null, characterSet.verticalEllipsis);
+                        printStream.println();
+                        previousLineRendered = false;
+                    }
+                    continue;
+                }
+
+                previousLineRendered = true;
+
                 writeLineNumber(printStream, line.lineNumber, maxNumbersOfDigit, false);
-                Label endedLabel = writeMultiLineLabel(printStream, line.lineNumber, occupiedMultiLineLabels, null);
+                Label endedLabel = writeMultiLineLabel(printStream, line.lineNumber, occupiedMultiLineLabels, null, characterSet.verticalBar);
 
                 printStream.append(lineBuilder.toString());
 
@@ -198,7 +220,7 @@ public class FileReportBuilder {
                 if (!appliedLabels.isEmpty()) {
                     // Render Underline
                     writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
-                    writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null);
+                    writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null, characterSet.verticalBar);
 
                     // Render under bars
                     for (Label label : appliedLabels) {
@@ -225,7 +247,7 @@ public class FileReportBuilder {
                     // Render lines, arrows, and label message
                     for (int j = 1; j < appliedLabels.size() * 2; j++) {
                         writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
-                        writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null);
+                        writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null, characterSet.verticalBar);
 
                         insertedLen = 0;
                         for (int k = 0; k < appliedLabels.size(); k++) {
@@ -265,10 +287,10 @@ public class FileReportBuilder {
                 if (endedLabel != null) {
                     // Render multiline label's message
                     writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
-                    writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null);
+                    writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, null, characterSet.verticalBar);
                     printStream.append('\n');
                     writeLineNumber(printStream, -1, maxNumbersOfDigit, true);
-                    writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, endedLabel);
+                    writeMultiLineLabel(printStream, -1, occupiedMultiLineLabels, endedLabel, characterSet.verticalBar);
                     occupiedMultiLineLabels.computeIfPresent(endedLabel, (l, occupied) -> false);
                     boolean reset = writeColor(printStream, endedLabel.format);
                     printStream.append(new String(new char[mostLastPosition]).replace('\0', characterSet.horizontalBar));
@@ -362,7 +384,7 @@ public class FileReportBuilder {
         writeReset(printStream);
     }
 
-    private @Nullable Label writeMultiLineLabel(final @NotNull PrintStream printStream, int lineNumber, Map<Label, Boolean> labelMap, @Nullable Label terminatedLabel) {
+    private @Nullable Label writeMultiLineLabel(final @NotNull PrintStream printStream, int lineNumber, Map<Label, Boolean> labelMap, @Nullable Label terminatedLabel, char verticalBarVariant) {
         List<Map.Entry<Label, Boolean>> entries = new ArrayList<>(labelMap.entrySet());
         boolean shouldPrint = true;
         int lastIndex = 0;
@@ -393,7 +415,7 @@ public class FileReportBuilder {
                     printStream.append(new String(new char[(entries.size() - i) * 2 + 2]).replace('\0', characterSet.horizontalBar));
                     return null;
                 } else {
-                    printStream.append(characterSet.verticalBar);
+                    printStream.append(verticalBarVariant);
                     printStream.append(' ');
                 }
 
