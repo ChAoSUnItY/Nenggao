@@ -340,17 +340,10 @@ public class FileReportBuilder {
         return reports.isEmpty();
     }
 
-    private boolean writeColor(final @NotNull PrintStream printStream, @Nullable Attribute... attributes) {
-        boolean printed = false;
-
-        for (Attribute attr : attributes) {
-            if (attr != null && enableColor) {
+    private void writeColor(final @NotNull PrintStream printStream, @Nullable Attribute... attributes) {
+        for (Attribute attr : attributes)
+            if (attr != null && enableColor)
                 printStream.append(Ansi.generateCode(attr));
-                printed = true;
-            }
-        }
-
-        return printed;
     }
 
     private boolean writeColor(final @NotNull PrintStream printStream, @Nullable AnsiFormat format) {
