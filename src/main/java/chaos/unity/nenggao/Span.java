@@ -25,9 +25,7 @@ public class Span {
      * @return offset of two position.
      */
     public int offset() {
-        if (startPosition.pos > endPosition.pos) {
-            return -1;
-        } else if (startPosition.line != endPosition.line) {
+        if (startPosition.line != endPosition.line || startPosition.pos > endPosition.pos) {
             return -1;
         }
         return endPosition.pos - startPosition.pos;
