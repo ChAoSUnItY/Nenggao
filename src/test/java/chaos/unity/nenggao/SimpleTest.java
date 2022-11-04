@@ -35,6 +35,10 @@ public class SimpleTest {
                 .warning(Span.multipleLine(1, 0, 10, 0), "Warning No.2")
                 .label(Span.multipleLine(1, 0, 10, 1), "Label").color(Attribute.RED_TEXT()).hint("Hint!").build()
                 .build()
+                .warning(Span.multipleLine(1, 0, 2, 0), "Warning No.3")
+                .label(Span.singleLine(1, 0, 1), "Label No.1").color(Attribute.BRIGHT_BLUE_TEXT()).hint("Hint!").build()
+                .label(Span.singleLine(1, 1, 2), "Label No.2").color(Attribute.GREEN_TEXT()).build()
+                .build()
                 .print(System.out);
     }
 }

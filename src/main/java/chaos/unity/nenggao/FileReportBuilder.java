@@ -125,7 +125,7 @@ public class FileReportBuilder {
             // Used for mapping multi-line diagnostic spacing
             // Label instance - Is Occupied
             Map<Label, Boolean> occupiedMultiLineLabels = new LinkedHashMap<>();
-            List<Line> segment = source.slice(report.commonSpan.startPosition.line, report.commonSpan.endPosition.line);
+            List<Line> segment = source.subList(report.commonSpan.startPosition.line, report.commonSpan.endPosition.line);
 
             switch (report.type) {
                 case WARNING:
