@@ -148,14 +148,12 @@ public class FileReportBuilder {
                 if (label.isMultiLine())
                     occupiedMultiLineLabels.put(label, false);
 
-            boolean previousLineRendered = true;
-            boolean renderSource;
+            boolean previousLineRendered = true, renderSource;
             Label currentDominantLabel = null;
             for (Line line : segment) {
                 StringBuilder lineBuilder = new StringBuilder(line.chars);
                 List<Label> appliedLabels = new LinkedList<>();
-                int insertedLen = 0;
-                int mostLastPosition = line.len + 1;
+                int insertedLen = 0, mostLastPosition = line.len + 1;
                 renderSource = false;
 
                 for (Label label : report.labels) {
@@ -257,8 +255,7 @@ public class FileReportBuilder {
                             if (label == null)
                                 continue;
 
-                            int spaceLen = label.span.startPosition.pos - insertedLen;
-                            int offset = label.span.offset() / 2;
+                            int spaceLen = label.span.startPosition.pos - insertedLen, offset = label.span.offset() / 2;
 
                             printStream.append(new String(new char[spaceLen + offset]).replace('\0', ' '));
 
