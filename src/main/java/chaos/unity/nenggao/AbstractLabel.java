@@ -7,11 +7,11 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("unused")
 public abstract class AbstractLabel {
     public @Nullable AnsiFormat format = null;
-    public final @NotNull Span span;
+    public final @NotNull AbstractSpan span;
     public final @NotNull String message;
     public @Nullable String hint = null;
     
-    protected AbstractLabel(@NotNull Span span, @NotNull String message) {
+    protected AbstractLabel(@NotNull AbstractSpan span, @NotNull String message) {
         this.span = span;
         this.message = message;
     }
