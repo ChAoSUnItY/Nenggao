@@ -1,13 +1,13 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
 plugins {
     id("maven-publish")
     id("java")
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
+val commonVersion: String by properties
+
 group = "chaos.unity.nenggao"
-version = "1.4.0"
+version = commonVersion
 
 repositories {
     mavenCentral()

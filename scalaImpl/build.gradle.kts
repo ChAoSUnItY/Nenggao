@@ -2,8 +2,10 @@ plugins {
     scala
 }
 
+val commonVersion: String by properties
+
 group = "chaos.unity.nenggao"
-version = "1.4.0"
+version = commonVersion
 
 repositories {
     mavenCentral()
