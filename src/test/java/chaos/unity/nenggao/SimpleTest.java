@@ -17,9 +17,9 @@ public class SimpleTest {
                 .tag("E01")
                 .label(Span.multipleLine(1, 0, 3, 8), "LOL").color(Attribute.RED_TEXT()).build()
                 .label(Span.multipleLine(2, 0, 5, 0), "KEK").color(Attribute.BRIGHT_MAGENTA_TEXT()).build()
-                .label(Span.singleLine(1, 6, 11), "L").color(Attribute.BRIGHT_CYAN_TEXT()).build()
-                .label(Span.singleLine(3, 0, 4), "impl dude").color(Attribute.BRIGHT_CYAN_TEXT()).build()
-                .label(Span.multipleLine(4, 0, 6, 0), "kek").build()
+                .label(Span.singleLine(1, 6, 11), "L").color(Attribute.BRIGHT_CYAN_TEXT()).hint("Hint L").build()
+                .label(Span.singleLine(3, 0, 4), "impl dude").color(Attribute.BRIGHT_CYAN_TEXT()).hint("impl it!").build()
+                .label(Span.multipleLine(4, 0, 6, 0), "kek").hint("omegalul").build()
                 .build()
                 .print(System.out);
     }
