@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Span extends AbstractSpan {
-    public Span(@NotNull Position startPosition, @NotNull Position endPosition) {
+    public Span(@NotNull AbstractPosition startPosition, @NotNull AbstractPosition endPosition) {
         super(startPosition, endPosition);
     }
 
@@ -22,8 +22,8 @@ public class Span extends AbstractSpan {
                 return copied;
         }
 
-        Position startPosition = this.startPosition;
-        Position endPosition = endSpan.endPosition;
+        AbstractPosition startPosition = this.startPosition;
+        AbstractPosition endPosition = endSpan.endPosition;
 
         return new Span(startPosition, endPosition);
     }

@@ -5,10 +5,10 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public abstract class AbstractSpan {
-    public final @NotNull Position startPosition;
-    public final @NotNull Position endPosition;
+    public final @NotNull AbstractPosition startPosition;
+    public final @NotNull AbstractPosition endPosition;
 
-    protected AbstractSpan(@NotNull Position startPosition, @NotNull Position endPosition) {
+    protected AbstractSpan(@NotNull AbstractPosition startPosition, @NotNull AbstractPosition endPosition) {
         this.startPosition = startPosition;
         this.endPosition = endPosition;
     }
