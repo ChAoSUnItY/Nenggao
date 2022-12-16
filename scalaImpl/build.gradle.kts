@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.7.20"
+    scala
 }
 
-val commonVersion: String by project(":").properties
+val commonVersion: String by properties
 
 group = "chaos.unity.nenggao"
 version = commonVersion
