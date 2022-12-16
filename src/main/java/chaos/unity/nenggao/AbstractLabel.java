@@ -4,6 +4,7 @@ import com.diogonunes.jcolor.AnsiFormat;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("unused")
 public abstract class AbstractLabel {
     public @Nullable AnsiFormat format = null;
     public final @NotNull Span span;
