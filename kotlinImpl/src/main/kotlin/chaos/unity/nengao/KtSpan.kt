@@ -1,10 +1,11 @@
-package chaos.unity.nengao.kotlin
+package chaos.unity.nengao
 
 import chaos.unity.nenggao.AbstractPosition
 import chaos.unity.nenggao.AbstractSpan
 import chaos.unity.nenggao.Span
 
-data class Span(val startPosition: AbstractPosition, val endPosition: AbstractPosition) :
+@Suppress("unused")
+data class KtSpan(val startPosition: AbstractPosition, val endPosition: AbstractPosition) :
     AbstractSpan(startPosition, endPosition) {
     override fun expand(endSpan: AbstractSpan?): AbstractSpan =
         endSpan?.let {
