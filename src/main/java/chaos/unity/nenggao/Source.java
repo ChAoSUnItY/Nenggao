@@ -6,31 +6,26 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class Source {
-    public final @NotNull List<@NotNull Line> lines;
-
+public class Source extends ArrayList<@NotNull Line> {
     public Source(@NotNull List<@NotNull Line> lines) {
-        this.lines = lines;
+        this.addAll(lines);
     }
 
-    /**
-     *
-     * @param startLine starts from 1, pass 0 would throw exception
-     * @param endLine
-     * @return lines segment
-     * @throws IllegalArgumentException
-     */
-    public @NotNull List<@NotNull Line> slice(int startLine, int endLine) throws IllegalArgumentException {
-        if (startLine <= 0) {
-            throw new IllegalArgumentException("Unable to retrieve lines segment from source, start line index must larger than 0.");
+    @Override
+    public List<@NotNull Line> subList(int fromIndex, int toIndex) {
+        if (fromIndex == 0) {
+            throw new IllegalArgumentException("Line starts from 1, cannot subList from index 0.");
         }
 
-        return lines.subList(startLine - 1 , endLine);
+        return super.subList(fromIndex - 1, toIndex);
     }
 
     public static @Nullable Source fromFile(File file) {
@@ -47,7 +42,11 @@ public class Source {
         return source;
     }
 
-    public static Source fromStrings(@NotNull List<@NotNull String> lines) {
+    public static @NotNull Source fromString(@NotNull String line) {
+        return new Source(Collections.singletonList(new Line(1, 0, line.length(), line)));
+    }
+
+    public static @NotNull Source fromStrings(@NotNull List<@NotNull String> lines) {
         AtomicInteger offset = new AtomicInteger();
 
         return new Source(IntStream.range(0, lines.size()).mapToObj(i -> {

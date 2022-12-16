@@ -1,9 +1,13 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
+    id("maven-publish")
     id("java")
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 group = "chaos.unity.nenggao"
-version = "1.0-SNAPSHOT"
+version = "1.3.0"
 
 repositories {
     mavenCentral()
@@ -27,4 +31,30 @@ dependencies {
 
 tasks.getByName<Test>("test") {
     useJUnitPlatform()
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    classifier = "sources"
+    from(sourceSets.main.get().allSource)
+}
+
+tasks.shadowJar {
+    archiveName = "$baseName-$version.$extension"
+}
+
+publishing {
+    publications {
+        register("mavenJava", MavenPublication::class) {
+            groupId = group.toString()
+            artifactId = "nenggao"
+            version = version
+
+            from(components["java"])
+            artifact(sourcesJar.get())
+        }
+    }
+}
+
+artifacts {
+    archives(tasks.shadowJar)
 }

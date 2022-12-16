@@ -1,8 +1,10 @@
 # [Nenggao](https://en.wikipedia.org/wiki/Mount_Nenggao)
+[![](https://jitpack.io/v/ChAoSUnItY/Nenggao.svg)](https://jitpack.io/#ChAoSUnItY/Nenggao)
 > Makes diagnostic easier!
 A diagnostic library for parser / interpreter usages.
 
 ![image](https://user-images.githubusercontent.com/43753315/173344211-41987a7a-e5cf-45ce-b89a-16c4c77e5e27.png)
+![image](https://user-images.githubusercontent.com/43753315/173404304-c5df1349-dd65-43cf-990e-7ae837f444fd.png)
 
 ## About
 Nenggao is a diagnostic library mainly designed for [Yakou Lang's compiler](https://github.com/CASC-Lang/CASC), 

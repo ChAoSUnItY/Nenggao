@@ -2,13 +2,14 @@ package chaos.unity.nenggao;
 
 public enum CharacterSet {
     UNICODE(
-            '→',
+            '▶',
             '─',
             '│',
             '┼',
             '┬',
             '├',
             '·',
+            '⋮',
             '╭',
             '╰',
             '╯',
@@ -22,6 +23,7 @@ public enum CharacterSet {
             '|',
             '|',
             '*',
+            ':',
             ',',
             '`',
             '\'',
@@ -40,6 +42,7 @@ public enum CharacterSet {
 
     // VERTICAL BAR VARIANTS
     public final char verticalBarBreaking;
+    public final char verticalEllipsis;
 
     // LINE EDGES
     public final char leftTop;
@@ -58,6 +61,7 @@ public enum CharacterSet {
             char underBar,
             char leftCross,
             char verticalBarBreaking,
+            char verticalEllipsis,
             char leftTop,
             char leftBottom,
             char rightBottom,
@@ -70,6 +74,7 @@ public enum CharacterSet {
         this.underBar = underBar;
         this.leftCross = leftCross;
         this.verticalBarBreaking = verticalBarBreaking;
+        this.verticalEllipsis = verticalEllipsis;
         this.leftTop = leftTop;
         this.leftBottom = leftBottom;
         this.rightBottom = rightBottom;

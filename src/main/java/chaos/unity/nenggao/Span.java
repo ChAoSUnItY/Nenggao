@@ -1,67 +1,35 @@
 package chaos.unity.nenggao;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class Span {
-    public final @NotNull Position startPosition;
-    public final @NotNull Position endPosition;
-
-    public Span(@NotNull Position startPosition, @NotNull Position endPosition) {
-        this.startPosition = startPosition;
-        this.endPosition = endPosition;
+public class Span extends AbstractSpan {
+    public Span(@NotNull AbstractPosition startPosition, @NotNull AbstractPosition endPosition) {
+        super(startPosition, endPosition);
     }
 
-    public boolean isMultiLine() {
-        return startPosition.line != endPosition.line;
-    }
+    @Override
+    public @NotNull AbstractSpan expand(@Nullable AbstractSpan endSpan) {
+        AbstractSpan copied = copy();
 
-    public boolean isIn(int line) {
-        return startPosition.line <= line && line <= endPosition.line;
-    }
+        if (endSpan == null)
+            return copied;
 
-    /**
-     * get offset of two position, returns -1 when two positions are in different lines or end position is in front of start position.
-     * @return offset of two position.
-     */
-    public int offset() {
-        if (startPosition.pos > endPosition.pos) {
-            return -1;
-        } else if (startPosition.line != endPosition.line) {
-            return -1;
+        if (endSpan.endPosition.line < startPosition.line)
+            return copied;
+        else if (endSpan.endPosition.line == startPosition.line) {
+            if (endSpan.endPosition.pos < startPosition.pos)
+                return copied;
         }
-        return endPosition.pos - startPosition.pos;
+
+        AbstractPosition startPosition = this.startPosition;
+        AbstractPosition endPosition = endSpan.endPosition;
+
+        return new Span(startPosition, endPosition);
     }
 
-    /**
-     * range constructs a span that ignores positions in lines, which is effective when using in source segment capturing.
-     * @param startLineNumber start of range, must be larger than 1.
-     * @param endLineNumber end of range.
-     * @return span based on providing line range
-     */
-    public static Span range(int startLineNumber, int endLineNumber) {
-        return multipleLine(startLineNumber, 0, endLineNumber, 0);
-    }
-
-    /**
-     * singleLine constructs a span that only capture a string in single line.
-     * @param lineNumber start and end line, must be larger than 1.
-     * @param start start of span in line.
-     * @param end end of span in line.
-     * @return span.
-     */
-    public static Span singleLine(int lineNumber, int start, int end) {
-        return new Span(new Position(lineNumber, start), new Position(lineNumber, end));
-    }
-
-    /**
-     * multipleLine constructs a span with full control of all positions.
-     * @param startLineNumber start line, must be larger than 1.
-     * @param start start of span in start line.
-     * @param endLineNumber end line.
-     * @param end end of span in end line.
-     * @return span.
-     */
-    public static Span multipleLine(int startLineNumber, int start, int endLineNumber, int end) {
-        return new Span(new Position(startLineNumber, start), new Position(endLineNumber, end));
+    @Override
+    public @NotNull AbstractSpan copy() {
+        return new Span(startPosition, endPosition);
     }
 }
