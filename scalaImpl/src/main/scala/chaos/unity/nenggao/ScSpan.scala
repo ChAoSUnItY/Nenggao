@@ -1,6 +1,6 @@
 package chaos.unity.nenggao
 
-case class ScSpan(startPosition: AbstractPosition, endPosition: AbstractPosition) extends AbstractSpan(startPosition, endPosition) {
+case class ScSpan(startPos: AbstractPosition, endPos: AbstractPosition) extends AbstractSpan(startPos, endPos) {
   override def expand(endSpan: AbstractSpan): AbstractSpan = {
     val copied = copy()
     

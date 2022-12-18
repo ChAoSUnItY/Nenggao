@@ -3,4 +3,4 @@ package chaos.unity.nenggao
 import scala.annotation.unused
 
 @unused
-case class ScPosition(line: Int, pos: Int) extends AbstractPosition(line, pos)
+case class ScPosition(lineNumber: Int, position: Int) extends AbstractPosition(lineNumber, position)
