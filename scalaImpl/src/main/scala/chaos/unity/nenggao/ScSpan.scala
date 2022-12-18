@@ -8,7 +8,7 @@ case class ScSpan(startPosition: AbstractPosition, endPosition: AbstractPosition
     else if (endSpan.endPosition.line < startPosition.line) copied
     else if (endSpan.endPosition.line == startPosition.line && endSpan.endPosition.pos < startPosition.pos) copied
     else {
-      val startPosition = startPosition
+      val startPosition = this.startPosition
       val endPosition = endSpan.endPosition
 
       ScSpan(startPosition, endPosition) 
