@@ -479,19 +479,29 @@ public class FileReportBuilder {
      * Reported issue: https://github.com/PowerShell/PowerShell/issues/11449#issuecomment-569531747
      */
     private void enableWindows10AnsiSupport() {
-        Function GetStdHandleFunc = Function.getFunction("kernel32", "GetStdHandle");
-        DWORD STD_OUTPUT_HANDLE = new DWORD(-11);
-        HANDLE hOut = (HANDLE) GetStdHandleFunc.invoke(HANDLE.class, new Object[]{STD_OUTPUT_HANDLE});
+        String osName = System.getProperty("os.name");
+        if (osName == null || !osName.toLowerCase().startsWith("windows")) {
+            return;
+        }
+        
+        try {
+            Function GetStdHandleFunc = Function.getFunction("kernel32", "GetStdHandle");
+            DWORD STD_OUTPUT_HANDLE = new DWORD(-11);
+            HANDLE hOut = (HANDLE) GetStdHandleFunc.invoke(HANDLE.class,
+                new Object[]{STD_OUTPUT_HANDLE});
 
-        DWORDByReference p_dwMode = new DWORDByReference(new DWORD(0));
-        Function GetConsoleModeFunc = Function.getFunction("kernel32", "GetConsoleMode");
-        GetConsoleModeFunc.invoke(BOOL.class, new Object[]{hOut, p_dwMode});
+            DWORDByReference p_dwMode = new DWORDByReference(new DWORD(0));
+            Function GetConsoleModeFunc = Function.getFunction("kernel32", "GetConsoleMode");
+            GetConsoleModeFunc.invoke(BOOL.class, new Object[]{hOut, p_dwMode});
 
-        int ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4;
-        DWORD dwMode = p_dwMode.getValue();
-        dwMode.setValue(dwMode.intValue() | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
-        Function SetConsoleModeFunc = Function.getFunction("kernel32", "SetConsoleMode");
-        SetConsoleModeFunc.invoke(BOOL.class, new Object[]{hOut, dwMode});
+            int ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4;
+            DWORD dwMode = p_dwMode.getValue();
+            dwMode.setValue(dwMode.intValue() | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+            Function SetConsoleModeFunc = Function.getFunction("kernel32", "SetConsoleMode");
+            SetConsoleModeFunc.invoke(BOOL.class, new Object[]{hOut, dwMode});
+        } catch (UnsatisfiedLinkError | Exception e) {
+            System.err.println("Failed to enable Windows 10 Ansi support: " + e.getMessage());
+        }
     }
 
     public static class ReportBuilder {
